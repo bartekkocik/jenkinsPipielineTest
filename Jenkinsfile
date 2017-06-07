@@ -27,5 +27,5 @@ if (env.BRANCH_NAME == 'master') {
         } catch (e) {
             throw e
         }
-
+}
 

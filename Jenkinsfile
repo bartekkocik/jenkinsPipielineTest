@@ -1,11 +1,11 @@
 
-properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactNumToKeepStr: '5', numToKeepStr: '5']]])
+properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactNumToKeepStr: '1', numToKeepStr: '1']]])
 
 if (env.BRANCH_NAME == 'master') {
 
     stage('promote-staging')
 
-    input "Promote to staging?"
+    input "Promote to staging test?"
 
 
     stage('rollout-staging')
@@ -21,7 +21,7 @@ if (env.BRANCH_NAME == 'master') {
 
     stage('promote-production')
 
-    input "Promote to production?"
+    input "Promote to production test repo?"
 
 
     stage('rollout-production')

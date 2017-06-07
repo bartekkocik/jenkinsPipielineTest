@@ -5,31 +5,33 @@ if (env.BRANCH_NAME == 'master') {
 
  echo "promoting to staging"
 
-stage('rollout-staging') {
-node {
-	try {
-            sh "git checkout staging"
-            sh "git merge -X theirs master"
-            sh "git push origin HEAD"
-	} catch (e) {
-            throw e
-    }
-}
+	stage('rollout-staging') {
+		node {
+			try {
+				sh "git checkout staging"
+				sh "git merge -X theirs master"
+				sh "git push origin HEAD"
+			} catch (e) {
+					echo "promotion error"
+					throw e
+			}
+		}
+	}
 
-}
     echo "Promote to production test repo"
 	
-stage('rollout-production') {
-node {
-        try {
-            sh "git checkout production"
-            sh "git merge -X theirs staging"
-            sh "git push origin HEAD"
-        } catch (e) {
-            throw e
-        }
-}
-}
+	stage('rollout-production') {
+		node {
+			try {
+				sh "git checkout production"
+				sh "git merge -X theirs staging"
+				sh "git push origin HEAD"
+			} catch (e) {
+				echo "promotion error"
+				throw e
+			}
+		}
+	}
 }
 
 

@@ -9,7 +9,7 @@ stage('rollout-staging')
 node {
 	try {
             sh "git checkout staging"
-            sh "git merge -s -Xtheirs master"
+            sh "git merge master"
             sh "git push origin HEAD"
 	} catch (e) {
             throw e
@@ -23,7 +23,7 @@ stage('rollout-production')
 node {
         try {
             sh "git checkout production"
-            sh "git merge -s -Xtheirs staging"
+            sh "git merge staging"
             sh "git push origin HEAD"
         } catch (e) {
             throw e

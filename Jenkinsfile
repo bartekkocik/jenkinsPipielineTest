@@ -4,16 +4,22 @@ properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', 
 if (env.BRANCH_NAME == 'master') {
 
  echo "promoting to staging"
- 
+
+stage('rollout-staging')
+node {
+	try {
             sh "git checkout staging"
             sh "git merge -s theirs master"
             sh "git push origin HEAD"
+	} catch (e) {
+            throw e
+    }
+}
 
 
+    echo "Promote to production test repo?"
 
-    input "Promote to production test repo?"
-
-
+node {
         try {
             sh "git checkout production"
             sh "git merge -s theirs staging"
@@ -21,5 +27,6 @@ if (env.BRANCH_NAME == 'master') {
         } catch (e) {
             throw e
         }
+}
 }
 

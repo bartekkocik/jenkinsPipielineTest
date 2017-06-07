@@ -5,7 +5,7 @@ if (env.BRANCH_NAME == 'master') {
 
  echo "promoting to staging"
 
-stage('rollout-staging')
+stage('rollout-staging') {
 node {
 	try {
             sh "git checkout staging"
@@ -16,10 +16,10 @@ node {
     }
 }
 
-
+}
     echo "Promote to production test repo"
 	
-stage('rollout-production')
+stage('rollout-production') {
 node {
         try {
             sh "git checkout production"
@@ -30,5 +30,7 @@ node {
         }
 }
 }
+}
+
 
 

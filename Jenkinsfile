@@ -10,7 +10,6 @@ if (env.BRANCH_NAME == 'master') {
 			try {
 				sh "git checkout staging"
 				sh "git merge -s recursive -X theirs origin/master"
-				sh "git push origin HEAD"
 			} catch (e) {
 					echo "promotion error"
 					throw e
@@ -25,7 +24,6 @@ if (env.BRANCH_NAME == 'master') {
 			try {
 				sh "git checkout production"
 				sh "git merge -s recursive -X theirs origin/staging"
-				sh "git push origin HEAD"
 			} catch (e) {
 				echo "promotion error"
 				throw e

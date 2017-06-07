@@ -1,7 +1,6 @@
-@Library('falcon-pipeline-support') _
 
 properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactNumToKeepStr: '5', numToKeepStr: '5']]])
-slackNotify('STARTED')
+
 
 stage('checkout')
 try {
@@ -9,7 +8,6 @@ try {
         checkout scm
     }
 } catch (e) {
-    slackNotify('FAILED on checkout')
     throw e
 }
 
@@ -19,16 +17,15 @@ try {
         sh 'yamllint -d "{extends: default, rules: {comments-indentation: disable, line-length: disable, new-line-at-end-of-file: { level: warning }, indentation: { indent-sequences: no}}}" .'
     }
 } catch (e) {
-    slackNotify('FAILED on validation')
     throw e
 }
 
 if (env.BRANCH_NAME == 'master') {
 
     stage('promote-staging')
-    milestone()
+
     input "Promote to staging?"
-    milestone()
+
 
     stage('rollout-staging')
     node {
@@ -37,15 +34,14 @@ if (env.BRANCH_NAME == 'master') {
             sh "git merge -s theirs master"
             sh "git push origin HEAD"
         } catch (e) {
-            slackNotify('FAILED merging master to staging or pushing')
             throw e
         }
     }
 
     stage('promote-production')
-    milestone()
+
     input "Promote to production?"
-    milestone()
+
 
     stage('rollout-production')
     node {
@@ -54,10 +50,8 @@ if (env.BRANCH_NAME == 'master') {
             sh "git merge -s theirs staging"
             sh "git push origin HEAD"
         } catch (e) {
-            slackNotify('FAILED merging staging to production or pushing')
             throw e
         }
     }
 }
 
-slackNotify('SUCCESSFUL')

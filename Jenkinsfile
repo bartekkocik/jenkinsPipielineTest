@@ -3,8 +3,6 @@ properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', 
 
 if (env.BRANCH_NAME == 'master') {
 
-    stage('promote-staging')
-
     input "Promote to staging test?"
 
 

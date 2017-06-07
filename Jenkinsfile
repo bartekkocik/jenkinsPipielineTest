@@ -8,8 +8,6 @@ if (env.BRANCH_NAME == 'master') {
     input "Promote to staging test?"
 
 
-    stage('rollout-staging')
-    node {
         try {
             sh "git checkout staging"
             sh "git merge -s theirs master"
@@ -17,15 +15,11 @@ if (env.BRANCH_NAME == 'master') {
         } catch (e) {
             throw e
         }
-    }
 
-    stage('promote-production')
 
     input "Promote to production test repo?"
 
 
-    stage('rollout-production')
-    node {
         try {
             sh "git checkout production"
             sh "git merge -s theirs staging"
@@ -33,6 +27,5 @@ if (env.BRANCH_NAME == 'master') {
         } catch (e) {
             throw e
         }
-    }
-}
+
 

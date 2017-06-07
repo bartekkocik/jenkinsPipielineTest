@@ -9,7 +9,7 @@ if (env.BRANCH_NAME == 'master') {
 		node {
 			try {
 				sh "git checkout staging"
-				sh "git merge -s recursive -X theirs master"
+				sh "git merge -s recursive -X theirs origin/master"
 				sh "git push origin HEAD"
 			} catch (e) {
 					echo "promotion error"
@@ -24,7 +24,7 @@ if (env.BRANCH_NAME == 'master') {
 		node {
 			try {
 				sh "git checkout production"
-				sh "git merge -s recursive -X theirs staging"
+				sh "git merge -s recursive -X theirs origin/staging"
 				sh "git push origin HEAD"
 			} catch (e) {
 				echo "promotion error"

@@ -1,9 +1,10 @@
 
 properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactNumToKeepStr: '1', numToKeepStr: '1']]])
 
-stage 'Checkout'
+stage 'Checkout' {
 
-checkout scm
+	checkout scm
+}
 
 if (env.BRANCH_NAME == 'master') {
 

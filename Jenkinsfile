@@ -1,25 +1,6 @@
 
 properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactNumToKeepStr: '5', numToKeepStr: '5']]])
 
-
-stage('checkout')
-try {
-    node {
-        checkout scm
-    }
-} catch (e) {
-    throw e
-}
-
-stage('validate')
-try {
-    node {
-        sh 'yamllint -d "{extends: default, rules: {comments-indentation: disable, line-length: disable, new-line-at-end-of-file: { level: warning }, indentation: { indent-sequences: no}}}" .'
-    }
-} catch (e) {
-    throw e
-}
-
 if (env.BRANCH_NAME == 'master') {
 
     stage('promote-staging')

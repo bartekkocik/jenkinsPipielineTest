@@ -39,8 +39,8 @@ if (env.BRANCH_NAME == 'master') {
             slackNotify(readFile('GIT_COMMIT'))
 
             sh "git checkout origin/staging"
+            sh "git pull origin HEAD:staging"
             sh "git merge -s recursive -X theirs origin/master"
-            sh "git config --global push.default simple"
             sh "git push origin HEAD:staging"
     }
 }
@@ -57,8 +57,8 @@ if (env.BRANCH_NAME == 'staging') {
             slackNotify(readFile('GIT_COMMIT'))
 
             sh "git checkout origin/production"
+            sh "git pull origin HEAD:production"
             sh "git merge -s recursive -X theirs origin/staging"
-            sh "git config --global push.default simple"
             sh "git push origin HEAD:production"
     }
 }

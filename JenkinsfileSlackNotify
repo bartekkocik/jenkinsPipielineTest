@@ -1,0 +1,63 @@
+@Library('falcon-pipeline-support') _
+
+properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactNumToKeepStr: '5', numToKeepStr: '5']]])
+
+stage('checkout')
+try {
+    node {
+        checkout scm
+    }
+} catch (e) {
+    slackNotify('FAILED on checkout')
+    throw e
+}
+
+stage('validate')
+try {
+    node {
+        sh 'yamllint -d "{extends: default, rules: {comments-indentation: disable, line-length: disable, new-line-at-end-of-file: { level: warning }, indentation: { indent-sequences: no}}}" .'
+    }
+} catch (e) {
+    slackNotify('FAILED on yaml validation')
+    throw e
+}
+
+stage('log')
+try {
+    node {
+        sh 'git log -1 > GIT_COMMIT'
+        echo readFile('GIT_COMMIT')
+    }
+} catch (e) {
+    slackNotify('FAILED log commit message')
+    throw e
+}
+
+
+
+if (env.BRANCH_NAME == 'master') {
+
+    stage('promote-staging')
+    milestone()
+    echo "Promote to staging"
+    milestone()
+
+    stage('rollout-staging')
+    node {
+            slackNotify('Unmerged changes. Create pull request with merge master branch in to staging')
+            slackNotify(readFile('GIT_COMMIT'))
+    }
+}
+
+if (env.BRANCH_NAME == 'staging') {
+    stage('promote-production')
+    milestone()
+    echo "Promote to production"
+    milestone()
+
+    stage('rollout-production')
+    node {
+            slackNotify('Unmerged changes. Create pull request with merge staging branch in to production')
+            slackNotify(readFile('GIT_COMMIT'))
+    }
+}

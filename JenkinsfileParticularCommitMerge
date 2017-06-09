@@ -1,0 +1,87 @@
+@Library('falcon-pipeline-support') _
+
+properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactNumToKeepStr: '5', numToKeepStr: '5']]])
+slackNotify('STARTED')
+
+String lastCommitId
+
+stage('checkout')
+try {
+    node {
+        checkout scm
+    }
+} catch (e) {
+    slackNotify('FAILED on checkout')
+    throw e
+}
+
+stage('validate')
+try {
+    node {
+        sh 'yamllint -d "{extends: default, rules: {comments-indentation: disable, line-length: disable, new-line-at-end-of-file: { level: warning }, indentation: { indent-sequences: no}}}" .'
+    }
+} catch (e) {
+    slackNotify('FAILED on yaml validation')
+    throw e
+}
+
+stage('log')
+try {
+    node {
+        sh 'git log -1 > GIT_COMMIT_MSG'
+        echo readFile('GIT_COMMIT_MSG')
+        sh 'git rev-parse HEAD > GIT_LAST_COMMIT'
+        lastCommitId = readFile('GIT_LAST_COMMIT').take(6).trim()
+        echo lastCommitId
+    }
+} catch (e) {
+    slackNotify('FAILED log commit message')
+    throw e
+}
+
+
+if (env.BRANCH_NAME == 'master') {
+
+    stage('promote-staging')
+    milestone()
+    input "Promote to staging?"
+    milestone()
+
+    stage('rollout-staging')
+    node {
+        try {
+            slackNotify('Unmerged changes. Rollout to staging')
+            slackNotify(readFile('GIT_COMMIT_MSG'))
+
+            sh "git checkout origin/staging"
+            sh "git merge " + lastCommitId
+            sh "git push origin HEAD:staging"
+        } catch (e) {
+            slackNotify('FAILED rollout to staging')
+            throw e
+        }
+    }
+
+    stage('promote-production')
+    milestone()
+    input "Promote to production?"
+    milestone()
+
+    stage('rollout-production')
+    node {
+        try {
+            slackNotify('Unmerged changes. Rollout to production')
+            slackNotify(readFile('GIT_COMMIT_MSG'))
+
+            sh "git checkout origin/production"
+            sh "git merge " + lastCommitId
+            sh "git push origin HEAD:production"
+        } catch (e) {
+            slackNotify('FAILED rollout to production')
+            throw e
+        }
+    }
+}
+
+slackNotify('SUCCESSFUL')
+echo "test27"

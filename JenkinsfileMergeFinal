@@ -19,7 +19,7 @@ try {
         sh 'yamllint -d "{extends: default, rules: {comments-indentation: disable, line-length: disable, new-line-at-end-of-file: { level: warning }, indentation: { indent-sequences: no}}}" .'
     }
 } catch (e) {
-    slackNotify('FAILED on validation')
+    slackNotify('FAILED on yaml validation')
     throw e
 }
 
@@ -60,7 +60,7 @@ if (env.BRANCH_NAME == 'master') {
 
     stage('promote-production')
     milestone()
-    input "Promote ${tag} to production?"
+    input "Promote to production?"
     milestone()
 
     stage('rollout-production')

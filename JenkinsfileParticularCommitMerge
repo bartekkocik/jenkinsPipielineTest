@@ -4,6 +4,7 @@ properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', 
 slackNotify('STARTED')
 
 String lastCommitId
+String commitMsg
 
 stage('checkout')
 try {
@@ -25,13 +26,10 @@ try {
     throw e
 }
 
-stage('log')
 try {
     node {
-        sh 'git log -1 > GIT_COMMIT_MSG'
-        echo readFile('GIT_COMMIT_MSG')
-        sh 'git rev-parse HEAD > GIT_LAST_COMMIT'
-        lastCommitId = readFile('GIT_LAST_COMMIT').take(6).trim()
+        commitMsg = sh(script: 'git log -1', returnStdout: true)
+        lastCommitId = sh(script: 'git rev-parse HEAD', returnStdout: true).take(6).trim()
         echo lastCommitId
     }
 } catch (e) {
@@ -50,8 +48,7 @@ if (env.BRANCH_NAME == 'master') {
     stage('rollout-staging')
     node {
         try {
-            slackNotify('Unmerged changes. Rollout to staging')
-            slackNotify(readFile('GIT_COMMIT_MSG'))
+            slackNotify("Configuration rollout to staging \n" + commitMsg)
 
             sh "git checkout origin/staging"
             sh "git merge " + lastCommitId
@@ -70,8 +67,7 @@ if (env.BRANCH_NAME == 'master') {
     stage('rollout-production')
     node {
         try {
-            slackNotify('Unmerged changes. Rollout to production')
-            slackNotify(readFile('GIT_COMMIT_MSG'))
+            slackNotify("Configuration rollout to production \n" + commitMsg)
 
             sh "git checkout origin/production"
             sh "git merge " + lastCommitId
@@ -84,4 +80,3 @@ if (env.BRANCH_NAME == 'master') {
 }
 
 slackNotify('SUCCESSFUL')
-echo "test27"

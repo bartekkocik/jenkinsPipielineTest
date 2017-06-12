@@ -30,7 +30,7 @@ try {
     node {
         commitMsg = sh(script: 'git log -1', returnStdout: true)
         lastCommitId = sh(script: 'git rev-parse HEAD', returnStdout: true).take(6).trim()
-        echo lastCommitId
+        echo "Last commit id " + lastCommitId
     }
 } catch (e) {
     slackNotify('FAILED log commit message')
